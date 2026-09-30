@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusENEM - Gerenciador Time Box</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
+    h1 { color: #2c3e50; font-size: 1.5rem; margin-bottom: 1.5rem; }
+    .timer-display { font-size: 3.5rem; font-weight: bold; color: #e74c3c; margin: 1rem 0; font-family: monospace; }
+    .form-group { text-align: left; margin-bottom: 1rem; }
+    label { font-weight: 600; font-size: 0.9rem; color: #34495e; display: block; margin-bottom: 0.3rem; }
+    input, select, button { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+    button { background-color: #27ae60; color: white; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
+    button:hover { background-color: #219150; }
+    .stop-btn { background-color: #e74c3c; display: none; }
+    .stop-btn:hover { background-color: #c0392b; }
+    .history { margin-top: 1.5rem; text-align: left; }
+    .history h3 { font-size: 1rem; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 0.3rem; }
+    ul { list-style: none; padding: 0; margin: 0; max-height: 120px; overflow-y: auto; }
+    li { background: #f8f9fa; padding: 0.5rem; border-left: 4px solid #27ae60; margin-bottom: 0.5rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>🎯 FocusENEM - Time Box</h1>
+    
+    <div class="form-group">
+      <label for="materia">Área / Matéria do ENEM:</label>
+      <select id="materia">
+        <option value="Matemática">Matemática</option>
+        <option value="Redação">Redação</option>
+        <option value="Linguagens">Linguagens</option>
+        <option value="Ciências da Natureza">Ciências da Natureza</option>
+        <option value="Ciências Humanas">Ciências Humanas</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="duracao">Duração da Time Box (minutos):</label>
+      <!-- oninput e onchange adicionados para capturar qualquer alteração imediatamente -->
+      <input type="number" id="duracao" value="25" min="1" max="60" oninput="atualizarTempoInicial()" onchange="atualizarTempoInicial()">
+    </div>
+
+    <div class="timer-display" id="timer">25:00</div>
+
+    <button id="startBtn" onclick="iniciarTimeBox()">Iniciar Bloco de Foco</button>
+    <button id="stopBtn" class="stop-btn" onclick="pararTimeBox()">Interromper Bloco</button>
+
+    <div class="history">
+      <h3>Blocos Concluídos</h3>
+      <ul id="listaHistorico">
+        <!-- Itens registrados entram aqui -->
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    let tempoRestante = 0;
+    let timerInterval = null;
+
+    // Sincroniza o timer assim que a página abre, evitando que fique preso no valor padrão do HTML antigo
+    document.addEventListener("DOMContentLoaded", () => {
+      atualizarTempoInicial();
+    });
+
+    function atualizarDisplay(segundos) {
+      const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+      const seg = String(segundos % 60).padStart(2, '0');
+      document.getElementById('timer').innerText = `min:{seg}`;
+    }
+
+    function atualizarTempoInicial() {
+      // Se houver um timer rodando, não altera o visor para não bugar a contagem atual
+      if (timerInterval !== null) return; 
+
+      const minutos = parseInt(document.getElementById('duracao').value);
+      if (!isNaN(minutos) && minutos > 0) {
+        atualizarDisplay(minutos * 60);
+      }
+    }
+
+    function iniciarTimeBox() {
+      // Garante que não crie dois intervalos duplicados se clicar várias vezes rápido
+      if (timerInterval !== null) clearInterval(timerInterval);
+
+      const minutos = parseInt(document.getElementById('duracao').value);
+      if (isNaN(minutos) || minutos <= 0) return alert('Informe um tempo válido.');
+
+      tempoRestante = minutos * 60;
+      atualizarDisplay(tempoRestante);
+
+      document.getElementById('startBtn').style.display = 'none';
+      document.getElementById('stopBtn').style.display = 'block';
+
+      timerInterval = setInterval(() => {
+        tempoRestante--;
+        atualizarDisplay(tempoRestante);
+
+        if (tempoRestante <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          alert('⏰ A Time Box terminou! Interrompa a tarefa imediatamente para a pausa.');
+          registrarBloco();
+          resetsInterface();
+        }
+      }, 1000);
+    }
+
+    function pararTimeBox() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      alert('Bloco interrompido.');
+      resetsInterface();
+    }
+
+    function resetsInterface() {
+      document.getElementById('startBtn').style.display = 'block';
+      document.getElementById('stopBtn').style.display = 'none';
+      atualizarTempoInicial();
+    }
+
+    function registrarBloco() {
+      const materia = document.getElementById('materia').value;
+      const minutos = document.getElementById('duracao').value;
+      const lista = document.getElementById('listaHistorico');
+      
+      const item = document.createElement('li');
+      item.innerText = `✅ ${materia} - Bloco de ${minutos} min concluído.`;
+      lista.appendChild(item);
+    }
+  </script>
+</body>
+</html>
+
+
