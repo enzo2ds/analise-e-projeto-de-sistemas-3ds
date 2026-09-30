@@ -1,139 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FocusENEM - Gerenciador Time Box</title>
-  <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
-    h1 { color: #2c3e50; font-size: 1.5rem; margin-bottom: 1.5rem; }
-    .timer-display { font-size: 3.5rem; font-weight: bold; color: #e74c3c; margin: 1rem 0; font-family: monospace; }
-    .form-group { text-align: left; margin-bottom: 1rem; }
-    label { font-weight: 600; font-size: 0.9rem; color: #34495e; display: block; margin-bottom: 0.3rem; }
-    input, select, button { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
-    button { background-color: #27ae60; color: white; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; margin-top: 0.5rem; }
-    button:hover { background-color: #219150; }
-    .stop-btn { background-color: #e74c3c; display: none; }
-    .stop-btn:hover { background-color: #c0392b; }
-    .history { margin-top: 1.5rem; text-align: left; }
-    .history h3 { font-size: 1rem; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 0.3rem; }
-    ul { list-style: none; padding: 0; margin: 0; max-height: 120px; overflow-y: auto; }
-    li { background: #f8f9fa; padding: 0.5rem; border-left: 4px solid #27ae60; margin-bottom: 0.5rem; font-size: 0.85rem; }
-  </style>
+    <meta charset="UTF-8">
+    <title>FocusENEM - Gerenciador Time Box</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 1rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 420px; text-align: center; }
+        .timer-display { font-size: 3.2rem; font-weight: bold; color: #e74c3c; margin: 0.2rem 0; font-family: monospace; }
+        .timer-status { font-weight: bold; font-size: 0.9rem; color: #7f8c8d; margin-bottom: 0.6rem; text-transform: uppercase; }
+        .form-group { text-align: left; margin-bottom: 0.6rem; }
+        .form-row { display: flex; gap: 0.5rem; }
+        .form-row .form-group { flex: 1; }
+        label { font-weight: 600; font-size: 0.85rem; color: #34495e; display: block; margin-bottom: 0.2rem; }
+        input, select, button { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 5px; font-size: 0.85rem; }
+        button { background: #27ae60; color: white; font-weight: bold; border: none; cursor: pointer; margin-top: 0.4rem; transition: background 0.2s; }
+        button:hover { background: #219150; }
+        .stop-btn { background: #e74c3c; display: none; }
+        .stop-btn:hover { background: #c0392b; }
+        .meta-container { background: #e8f8f5; border: 1px solid #a3e4d7; border-radius: 5px; padding: 0.5rem; margin: 0.8rem 0; font-size: 0.85rem; color: #16a085; font-weight: bold; display: flex; justify-content: space-between; }
+        ul { list-style: none; padding: 0; max-height: 120px; overflow-y: auto; border: 1px solid #eee; border-radius: 5px; background: #fafafa; }
+        li { background: white; padding: 0.4rem; border-left: 4px solid #27ae60; border-bottom: 1px solid #eee; font-size: 0.8rem; text-align: left; }
+        li.pausa-log { border-left-color: #3498db; background: #f4f9fd; }
+    </style>
 </head>
 <body>
+    <div class="card">
+        <h2>⏱️ FocusENEM - Time Box</h2>
+        
+        <div class="form-group">
+            <label>🎯 Conteúdo / Tópico Específico (Missão 1):</label>
+            <input type="text" id="topico" placeholder="Ex: Geometria Plana, Redação Nota 1000">
+        </div>
 
-  <div class="card">
-    <h1>🎯 FocusENEM - Time Box</h1>
-    
-    <div class="form-group">
-      <label for="materia">Área / Matéria do ENEM:</label>
-      <select id="materia">
-        <option value="Matemática">Matemática</option>
-        <option value="Redação">Redação</option>
-        <option value="Linguagens">Linguagens</option>
-        <option value="Ciências da Natureza">Ciências da Natureza</option>
-        <option value="Ciências Humanas">Ciências Humanas</option>
-      </select>
+        <div class="form-row">
+            <div class="form-group">
+                <label>📚 Área do ENEM:</label>
+                <select id="materia">
+                    <option value="Matemática">Matemática</option>
+                    <option value="Redação">Redação</option>
+                    <option value="Linguagens">Linguagens</option>
+                    <option value="Ciências da Natureza">Ciências da Natureza</option>
+                    <option value="Ciências Humanas">Ciências Humanas</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>⏳ Duração (min):</label>
+                <input type="number" id="duracao" value="25" min="1" max="60" oninput="atualizarTempoInicial()" onchange="atualizarTempoInicial()">
+            </div>
+        </div>
+
+        <!-- Missão 3: Configuração da Meta Diária -->
+        <div class="form-group">
+            <label>🏁 Meta de Blocos Diários:</label>
+            <input type="number" id="metaDiaria" value="4" min="1" onchange="atualizarMetaDisplay()">
+        </div>
+
+        <!-- Painel de Progresso da Meta -->
+        <div class="meta-container">
+            <span>📈 Progresso do Dia:</span>
+            <span id="progressoMeta">0 / 4 concluídos</span>
+        </div>
+
+        <div class="timer-status" id="timerStatus">Status: Aguardando</div>
+        <div class="timer-display" id="timer">25:00</div>
+        
+        <button id="startBtn" onclick="iniciarTimeBox()">🚀 Iniciar Bloco de Foco</button>
+        <button id="stopBtn" class="stop-btn" onclick="pararTimeBox()">🛑 Interromper Bloco</button>
+        
+        <div style="text-align:left; margin-top:0.8rem;">
+            <h4 style="margin:0 0 0.2rem 0; font-size:0.85rem; display:flex; justify-content:between;">
+                📋 Histórico de Blocos Concluídos (Missão 4)
+            </h4>
+            <ul id="listaHistorico"></ul>
+            <button onclick="limparHistorico()" style="background:#7f8c8d; font-size:0.75rem; padding:0.25rem; margin-top:0.2rem;">Clear LocalStorage</button>
+        </div>
     </div>
 
-    <div class="form-group">
-      <label for="duracao">Duração da Time Box (minutos):</label>
-      <!-- oninput e onchange adicionados para capturar qualquer alteração imediatamente -->
-      <input type="number" id="duracao" value="25" min="1" max="60" oninput="atualizarTempoInicial()" onchange="atualizarTempoInicial()">
-    </div>
+    <script>
+        let tempoRestante = 0;
+        let timerInterval = null;
+        let emPausaPomodoro = false; // Controle da Missão 2
+        let blocosConcluidosContador = 0;
 
-    <div class="timer-display" id="timer">25:00</div>
+        // Executado ao carregar a página
+        window.onload = function() {
+            carregarDadosLocalStorage();
+            atualizarTempoInicial();
+        };
 
-    <button id="startBtn" onclick="iniciarTimeBox()">Iniciar Bloco de Foco</button>
-    <button id="stopBtn" class="stop-btn" onclick="pararTimeBox()">Interromper Bloco</button>
-
-    <div class="history">
-      <h3>Blocos Concluídos</h3>
-      <ul id="listaHistorico">
-        <!-- Itens registrados entram aqui -->
-      </ul>
-    </div>
-  </div>
-
-  <script>
-    let tempoRestante = 0;
-    let timerInterval = null;
-
-    // Sincroniza o timer assim que a página abre, evitando que fique preso no valor padrão do HTML antigo
-    document.addEventListener("DOMContentLoaded", () => {
-      atualizarTempoInicial();
-    });
-
-    function atualizarDisplay(segundos) {
-      const min = String(Math.floor(segundos / 60)).padStart(2, '0');
-      const seg = String(segundos % 60).padStart(2, '0');
-      document.getElementById('timer').innerText = `min:{seg}`;
-    }
-
-    function atualizarTempoInicial() {
-      // Se houver um timer rodando, não altera o visor para não bugar a contagem atual
-      if (timerInterval !== null) return; 
-
-      const minutos = parseInt(document.getElementById('duracao').value);
-      if (!isNaN(minutos) && minutos > 0) {
-        atualizarDisplay(minutos * 60);
-      }
-    }
-
-    function iniciarTimeBox() {
-      // Garante que não crie dois intervalos duplicados se clicar várias vezes rápido
-      if (timerInterval !== null) clearInterval(timerInterval);
-
-      const minutos = parseInt(document.getElementById('duracao').value);
-      if (isNaN(minutos) || minutos <= 0) return alert('Informe um tempo válido.');
-
-      tempoRestante = minutos * 60;
-      atualizarDisplay(tempoRestante);
-
-      document.getElementById('startBtn').style.display = 'none';
-      document.getElementById('stopBtn').style.display = 'block';
-
-      timerInterval = setInterval(() => {
-        tempoRestante--;
-        atualizarDisplay(tempoRestante);
-
-        if (tempoRestante <= 0) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          alert('⏰ A Time Box terminou! Interrompa a tarefa imediatamente para a pausa.');
-          registrarBloco();
-          resetsInterface();
+        function atualizarDisplay(segundos) {
+            const min = String(Math.floor(segundos / 60)).padStart(2, '0');
+            const seg = String(segundos % 60).padStart(2, '0');
+            document.getElementById('timer').innerText = `${min}:${seg}`;
         }
-      }, 1000);
-    }
 
-    function pararTimeBox() {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      alert('Bloco interrompido.');
-      resetsInterface();
-    }
+        function atualizarTempoInicial() {
+            // Evita que alterações no input destruam o timer ativo
+            if (timerInterval !== null) return; 
+            
+            const min = parseInt(document.getElementById('duracao').value);
+            if (!isNaN(min) && min > 0) {
+                atualizarDisplay(min * 60);
+            }
+        }
 
-    function resetsInterface() {
-      document.getElementById('startBtn').style.display = 'block';
-      document.getElementById('stopBtn').style.display = 'none';
-      atualizarTempoInicial();
-    }
+        function atualizarMetaDisplay() {
+            const meta = document.getElementById('metaDiaria').value || 1;
+            document.getElementById('progressoMeta').innerText = `${blocosConcluidosContador} / ${meta} concluídos`;
+            
+            // Altera cor se a meta for atingida
+            if (blocosConcluidosContador >= parseInt(meta)) {
+                document.getElementById('progressoMeta').innerHTML = `🎉 ${blocosConcluidosContador} / ${meta} Meta Batida!`;
+            }
+        }
 
-    function registrarBloco() {
-      const materia = document.getElementById('materia').value;
-      const minutos = document.getElementById('duracao').value;
-      const lista = document.getElementById('listaHistorico');
-      
-      const item = document.createElement('li');
-      item.innerText = `✅ ${materia} - Bloco de ${minutos} min concluído.`;
-      lista.appendChild(item);
-    }
-  </script>
-</body>
-</html>
+        function iniciarTimeBox() {
+            if (timerInterval !== null) return;
 
+            const min = parseInt(document.getElementById('duracao').value);
+            if (isNaN(min) || min <= 0) return alert('Tempo inválido.');
 
+            // Verifica se está iniciando modo foco ou modo pausa automática (Missão 2)
+            if (!emPausaPomodoro) {
+                tempoRestante = min * 60;
+                document.getElementById('timerStatus').innerText = "🔥 Modo Foco Ativo";
+                document.getElementById('timerStatus').style.color = "#e74c3c";
+            } else {
+                tempoRestante = 5 * 60; // 5 minutos de pausa obrigatória
+                document.getElementById('timerStatus').innerText = "☕ Pausa Obrigatória";
+                document.getElementById('timerStatus').style.color = "#3498db";
+            }
+
+            atualizarDisplay(tempoRestante);
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
+
+            // Bloqueia inputs durante a execução do bloco
+            alternarInputs(true);
+
+            timerInterval = setInterval(() => {
+                tempoRestante--;
+                atualizarDisplay(tempoRestante);
+
+                if (tempoRestante <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+
+                    if (!emPausaPomodoro) {
+                        alert('🚨 Time Box encerrada! Faça sua pausa obrigatória de 5 minutos.');
+                        registrarBloco(); // Salva bloco de foco no histórico
+                        
+                        // Ativa de forma automática o ciclo de Pausa (Missão 2)
+                        emPausaPomodoro = true;
+                        iniciarTimeBox(); 
+                    } else {
+                        alert('✅ Pausa concluída! Pronto para o próximo bloco de foco.');
+                        emPausaPomodoro = false;
+                        resetsInterface();
+                    }
+                }
+            }, 1000);
+        }
+
+        function pararTimeBox() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            alert(emPausaPomodoro ? 'Pausa interrompida.' : 'Bloco de foco interrompido.');
+            emPausaPomodoro = false;
+            resetsInterface();
+        }
+
+        function resetsInterface() {
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('timerStatus').innerText = "Status: Aguardando";
+            document.getElementById('timerStatus').style.color = "#7f8c8d";
+            alternarInputs(false);
+            atualizarTempoInicial();
+        }
+
+        function alternarInputs(desabilitar) {
+            document.getElementById('materia').disabled = desabilitar;
+            document.getElementById('duracao').disabled = desabilitar;
+            document.getElementById('topico').disabled = desabilitar;
+            document.getElementById('metaDiaria').disabled = desabilitar;
+        }
+
+        // Missão 1 & Missão 4 integradas
+        function registrarBloco() {
+            const materia = document.getElementById('materia').value;
+            const min = document.getElementById('duracao').value;
+            let topico = document.getElementById('topico').value.trim();
+            
+            // Fallback caso o aluno não digite um tópico específico
+            if(topico === "") topico = "Conteúdo Geral"; 
+
+            const dataAtual = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+            const novoBloco = {
+                materia: materia,
+                duracao: min,
+                topico: topico,
+                hora: dataAtual
+            };
+
+            // Incrementa contador interno e atualiza a interface (Missão 3)
